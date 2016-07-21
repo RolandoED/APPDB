@@ -28,6 +28,12 @@ Los Resultados de un Procedimiento **NO se asignas a variables**
 	
 ---
 
+forms ejecucion
+
+	:SALIDAVER := TOTAL_PORDEPT_FN(90);
+
+---
+
 	select TIPO_CAMBIO_FN(SYSDATE, 'V') from DUAL;
 	
 	INSERT INTO TIPOS_CAMBIOS VALUES(SYSDATE, 522,522);
