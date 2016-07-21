@@ -53,3 +53,18 @@ EJEMPLO SCRIPT
 	group by d.dname
 	HAVING COUNT(*) > 3
 	/
+
+
+---
+
+
+	select e.ename, e.job, e.sal ,
+	LPAD(DECODE (e.JOB,
+	'MANAGER',SAL*1.05,
+	'SALESMAN',SAL*1.10,
+	'CLERK',SAL*1.15,SAL*1.025) ,10,'$')
+	NEW_SAL,
+	ROUND(MONTHS_BETWEEN(SYSDATE, HIREDATE)/12) "ANNOS"
+	from emp e
+	WHERE JOB != 'ANALYST'
+	/
