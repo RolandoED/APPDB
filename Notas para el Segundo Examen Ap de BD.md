@@ -74,3 +74,11 @@ EJEMPLO SCRIPT
 	from emp e
 	WHERE JOB != 'ANALYST'
 	/
+
+---
+
+	select count(Employee_id) , department_id
+	from employees 
+	where department_id  != 60 
+	group by department_id
+	/
