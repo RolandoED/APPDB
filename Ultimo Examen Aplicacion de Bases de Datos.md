@@ -251,3 +251,54 @@ CASE
 		'N/A'
 	END CATEGORIA
 	FROM EMP
+
+Function
+
+	CREATE OR REPLACE Function IncomeLevel
+	   ( name_in IN varchar2 )
+	   RETURN varchar2
+	IS
+	   monthly_value number(6);
+	   ILevel varchar2(20);
+	
+	   cursor c1 is
+	     SELECT monthly_income
+	     FROM employees
+	     WHERE name = name_in;
+	
+	BEGIN
+	
+	   open c1;
+	   fetch c1 into monthly_value;
+	   close c1;
+	
+	   IF monthly_value <= 4000 THEN
+	      ILevel := 'Low Income';
+	
+	   ELSIF monthly_value > 4000 and monthly_value <= 7000 THEN
+	      ILevel := 'Avg Income';
+	
+	   ELSIF monthly_value > 7000 and monthly_value <= 15000 THEN
+	      ILevel := 'Moderate Income';
+	
+	   ELSE
+	      ILevel := 'High Income';
+	
+	   END IF;
+	
+	   RETURN ILevel;
+	
+	END;
+
+###Trigger
+
+
+	create or replace TRIGGER VERIFICA_HORARIO 
+	BEFORE INSERT ON TIPOS_CAMBIOS 
+	BEGIN
+	  --NULL;
+	  IF to_CHAR(sysdate,'DY') IN ('SÁB','DOM') OR
+	        to_char(sysdate,'HH24') NOT BETWEEN '08' AND '18' THEN
+	        RAISE_APPLICATION_ERROR(-20666, 'No se puede realizar operacion');
+	  END IF;
+	END;
