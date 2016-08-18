@@ -17,7 +17,7 @@ Los Resultados de un Procedimiento **NO se asignas a variables**
 	  return v_monto;
 	END TIPO_CAMBIO_FN;
 
-###Como Ejecutarlo
+###Como Ejecutarlo Execute
 	
 	declare
 	  x number;

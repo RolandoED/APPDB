@@ -205,42 +205,9 @@ GRANTS para que funcione
 	grant usuario1 to fulano;
 
 
----
-
-La exportacion de datos se realiza con los comandos 
-
-	--Se usan a nivel de CMD line se usaba antes 
-	--de al version 9 pero todavia existe en 10g  y 11 g y el resto 
-	EXP / IMP * 
-
-	--DP significa datapoint
-	EXMPDP / IMPDP
 
 
-	EXP USR/PWD FILE=RUTA\ARCHIVO.DMP
-
-
-	TIENE 3 modos
-		- Completo TODO 
-	
-				EXP USR/PWD FILE=RUTA\ARCHIVO.DMP FULL=Y LOG=ARCHIVO.LOG
-
-		- Usuario  TODO lo que tiene el usuario
-	
-
-				EXP USR/PWD FILE=RUTA\ARCHIVO.DMP OWNER=HR
-
-		- Tablan   Solo la tabla con todo
-
-
-				EXP USR/PWD FILE=RUTA\ARCHIVO.DMP TABLES=HR.EMPLOYEES
-
-Importamos un usuario admin con permisos para hacer importaciones
- 
-	IMP USR/PWD FILE=RUTA\ARCHIVO.DMP FULLY=Y
-	IMP USR/PWD FILE=RUTA\ARCHIVO.DMP FROM USER=HR TOUSER=SCOTT
-
-CASE
+--CASE
 
 	SELECT ENAME , JOB, SAL "SAL ACT",
 	CASE
@@ -252,7 +219,7 @@ CASE
 	END CATEGORIA
 	FROM EMP
 
-Function
+--Function
 
 	CREATE OR REPLACE Function IncomeLevel
 	   ( name_in IN varchar2 )
@@ -290,7 +257,7 @@ Function
 	
 	END;
 
-###Trigger
+--Trigger
 
 
 	create or replace TRIGGER VERIFICA_HORARIO 
@@ -302,3 +269,178 @@ Function
 	        RAISE_APPLICATION_ERROR(-20666, 'No se puede realizar operacion');
 	  END IF;
 	END;
+
+--Cursor
+
+	GO_BLOCK('TASKS');
+	GO_ITEM('TASK_ID');
+	FIRST_RECORD;
+	
+	DECLARE
+		CURSOR DATOS IS 
+		
+		SELECT 
+		T.TASK_ID,
+		T.NAME,
+		T.PRIORITY ,
+		T.EMPLOYEE_ID ,
+		T.PROJECT_ID ,
+		T.STATE ,
+		T.TASK_DATE_START,
+		T.TASK_DATE_CONCLUDE
+	
+	FROM
+	  TASKS T
+	  
+	WHERE T.PROJECT_ID = :LS_PROJECTS;
+	      
+	      DATOS_REC DATOS%ROWTYPE;
+		
+	BEGIN 
+			CLEAR_BLOCK(NO_VALIDATE);					
+			FOR DATOS_REC IN DATOS LOOP
+				:EMPLOYEE_ID := DATOS_REC.EMPLOYEE_ID;
+				:TASK_ID := DATOS_REC.TASK_ID;
+				:NAME := DATOS_REC.NAME;
+				:PRIORITY := DATOS_REC.PRIORITY;
+				:PROJECT_ID := DATOS_REC.PROJECT_ID;	
+				--(sal,10,’*’)		
+				:STATE := TRIM('a' from LPAD('a',DATOS_REC.STATE,'*'));		
+				:TASK_DAT_CON := DATOS_REC.TASK_DATE_START;
+				:TASK_DATE := DATOS_REC.TASK_DATE_CONCLUDE;
+				NEXT_RECORD;
+			END LOOP;		
+	END;
+
+
+
+--Cursor TASKS
+	
+	DECLARE 
+		alerta number;
+	BEGIN	
+		alerta := show_alert('ALERTSAVE');
+		--si el boton es la alerta
+		IF ALERTA = ALERT_BUTTON1 THEN		
+				GO_BLOCK('BKEMPTASK');
+			  GO_ITEM('TXT_ID_EMP');
+			  --first_record;		  
+			  --DML;		  			
+			  INSERT INTO TASKS VALUES(to_number(:TXT_ID),
+			  :TXT_TASK_NAME,
+			   to_number(:txt_prio), to_number(:TXT_ID_EMP),
+			   TO_NUMBER(:LS_PROJECTS),0,:TXT_FECHA_CONCLUSION,:TXT_FECHA);
+			   
+			  standard.COMMIT;		  		  		  		
+	  		:SYSTEM.MESSAGE_LEVEL := '25';    	    	   
+	    	
+	    	message('AGREGADO los TASKS');
+	    	message('AGREGADO los TASKS');
+		
+				:SYSTEM.MESSAGE_LEVEL := '0';
+				
+				DELETE_RECORD;
+				GO_BLOCK('BKEMPTASK');
+			  GO_ITEM('TXT_ID_EMP');
+			END IF;
+	END;
+
+
+###delayed
+
+	GO_BLOCK('TASKS');
+	GO_ITEM('TASK_ID');
+	FIRST_RECORD;
+	
+	DECLARE
+		CURSOR DATOS IS 
+		
+		SELECT 
+		T.TASK_ID,
+		T.NAME,
+		T.PRIORITY ,
+		T.EMPLOYEE_ID ,
+		T.PROJECT_ID ,
+		T.STATE ,
+		T.TASK_DATE_START,
+		T.TASK_DATE_CONCLUDE
+	
+	FROM
+	  TASKS T
+	  
+	WHERE T.TASK_DATE_CONCLUDE < sysdate
+				AND T.PROJECT_ID=:PRO_ID;
+	      
+	      DATOS_REC DATOS%ROWTYPE;
+		
+	BEGIN 
+			CLEAR_BLOCK(NO_VALIDATE);					
+			FOR DATOS_REC IN DATOS LOOP
+				:TASK_ID := DATOS_REC.TASK_ID;
+			  :NAME := DATOS_REC.NAME;
+			  :PRIORITY := DATOS_REC.PRIORITY;
+				:EMPLOYEE_ID := DATOS_REC.EMPLOYEE_ID;
+				:PROJECT_ID := DATOS_REC.PROJECT_ID;	
+				--(sal,10,’*’)		
+				:STATE := DATOS_REC.STATE;
+				:TASK_DATE_CONCLUDE := DATOS_REC.TASK_DATE_CONCLUDE;
+				:TASK_DATE_START := DATOS_REC.TASK_DATE_START;
+	
+				NEXT_RECORD;
+			END LOOP;		
+	END;
+
+--DELETE RECORD
+
+	DELETE_RECORD;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+La exportacion de datos se realiza con los comandos 
+
+	--Se usan a nivel de CMD line se usaba antes 
+	--de al version 9 pero todavia existe en 10g  y 11 g y el resto 
+	EXP / IMP * 
+
+	--DP significa datapoint
+	EXMPDP / IMPDP
+
+
+	EXP USR/PWD FILE=RUTA\ARCHIVO.DMP
+
+
+	TIENE 3 modos
+		- Completo TODO 
+	
+				EXP USR/PWD FILE=RUTA\ARCHIVO.DMP FULL=Y LOG=ARCHIVO.LOG
+
+		- Usuario  TODO lo que tiene el usuario
+	
+
+				EXP USR/PWD FILE=RUTA\ARCHIVO.DMP OWNER=HR
+
+		- Tablan   Solo la tabla con todo
+
+
+				EXP USR/PWD FILE=RUTA\ARCHIVO.DMP TABLES=HR.EMPLOYEES
+
+--Importamos un usuario admin con permisos para hacer importaciones
+ 
+	IMP USR/PWD FILE=RUTA\ARCHIVO.DMP FULLY=Y
+	IMP USR/PWD FILE=RUTA\ARCHIVO.DMP FROM USER=HR TOUSER=SCOTT
